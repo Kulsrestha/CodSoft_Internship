@@ -1,100 +1,107 @@
 #include <iostream>
-#include <vector>
 
 using namespace std;
 
-const int BOARD_SIZE = 3;
-const char PLAYER_X = 'X';
-const char PLAYER_O = 'O';
+const int ROWS = 3;
+const int COLUMNS = 3;
 
-class TicTacToe {
-public:
-    TicTacToe() {
-        board.resize(BOARD_SIZE, vector<char>(BOARD_SIZE, ' '));
-        currentPlayer = PLAYER_X;
-        isGameOver = false;
+char board[ROWS][COLUMNS];
+char currentPlayer = 'X';
+
+void initializeBoard() {
+  for (int i = 0; i < ROWS; i++) {
+    for (int j = 0; j < COLUMNS; j++) {
+      board[i][j] = ' ';
     }
+  }
+}
 
-    void displayBoard() {
-        cout << "Current Board:" << endl;
-        for (int row = 0; row < BOARD_SIZE; ++row) {
-            for (int col = 0; col < BOARD_SIZE; ++col) {
-                cout << board[row][col];
-                if (col < BOARD_SIZE - 1) cout << " | ";
-            }
-            cout << endl;
-            if (row < BOARD_SIZE - 1) cout << "---------" << endl;
-        }
+void displayBoard() {
+  for (int i = 0; i < ROWS; i++) {
+    for (int j = 0; j < COLUMNS; j++) {
+      cout << board[i][j] << " ";
     }
+    cout << endl;
+  }
+}
 
-    bool makeMove(int row, int col) {
-        if (row < 0 || row >= BOARD_SIZE || col < 0 || col >= BOARD_SIZE || board[row][col] != ' ') {
-            cout << "Invalid move. Try again." << endl;
-            return false;
-        }
-
-        board[row][col] = currentPlayer;
-        return true;
-    }
-
-    bool checkWin() {
-        // Check rows, columns, and diagonals for a win
-        for (int i = 0; i < BOARD_SIZE; ++i) {
-            if (board[i][0] == currentPlayer && board[i][1] == currentPlayer && board[i][2] == currentPlayer) return true; // Rows
-            if (board[0][i] == currentPlayer && board[1][i] == currentPlayer && board[2][i] == currentPlayer) return true; // Columns
-        }
-        if (board[0][0] == currentPlayer && board[1][1] == currentPlayer && board[2][2] == currentPlayer) return true; // Diagonal
-        if (board[0][2] == currentPlayer && board[1][1] == currentPlayer && board[2][0] == currentPlayer) return true; // Anti-diagonal
+bool isFull() {
+  for (int i = 0; i < ROWS; i++) {
+    for (int j = 0; j < COLUMNS; j++) {
+      if (board[i][j] == ' ') {
         return false;
+      }
     }
+  }
+  return true;
+}
 
-    bool checkDraw() {
-        for (int i = 0; i < BOARD_SIZE; ++i) {
-            for (int j = 0; j < BOARD_SIZE; ++j) {
-                if (board[i][j] == ' ') return false; // If any cell is empty, the game is not a draw yet
-            }
-        }
-        return true; // All cells are filled, and no player has won
+bool isWinner(char player) {
+  // Check rows.
+  for (int i = 0; i < ROWS; i++) {
+    if (board[i][0] == player && board[i][1] == player && board[i][2] == player) {
+      return true;
     }
+  }
 
-    void switchPlayers() {
-        currentPlayer = (currentPlayer == PLAYER_X) ? PLAYER_O : PLAYER_X;
+  // Check columns.
+  for (int j = 0; j < COLUMNS; j++) {
+    if (board[0][j] == player && board[1][j] == player && board[2][j] == player) {
+      return true;
     }
+  }
 
-    bool isGameFinished() {
-        if (checkWin()) {
-            displayBoard();
-            cout << "Player " << currentPlayer << " wins!" << endl;
-            return true;
-        }
-        if (checkDraw()) {
-            displayBoard();
-            cout << "It's a draw!" << endl;
-            return true;
-        }
-        return false;
-    }
+  // Check diagonals.
+  if (board[0][0] == player && board[1][1] == player && board[2][2] == player) {
+    return true;
+  }
 
-private:
-    vector<vector<char>> board;
-    char currentPlayer;
-    bool isGameOver;
-};
+  if (board[0][2] == player && board[1][1] == player && board[2][0] == player) {
+    return true;
+  }
+
+  return false;
+}
+
+void switchPlayer() {
+  if (currentPlayer == 'X') {
+    currentPlayer = 'O';
+  } else {
+    currentPlayer = 'X';
+  }
+}
 
 int main() {
-    TicTacToe game;
+  initializeBoard();
 
-    cout << "Welcome to Tic-Tac-Toe!" << endl;
+  while (!isFull()) {
+    displayBoard();
 
-    while (!game.isGameFinished()) {
-        game.displayBoard();
-        int row, col;
-        cout << "Player " << game.getCurrentPlayer() << ", enter row (0-2) and column (0-2) separated by space: ";
-        cin >> row >> col;
-        if (game.makeMove(row, col)) {
-            game.switchPlayers();
-        }
+    int row, column;
+    cout << currentPlayer << "'s turn. Enter your move (row, column): ";
+    cin >> row >> column;
+
+    board[row][column] = currentPlayer;
+
+    if (isWinner(currentPlayer)) {
+      cout << currentPlayer << " wins! Congratulations!" << endl;
+      break;
     }
 
-    return 0;
+    switchPlayer();
+  }
+
+  if (!isFull()) {
+    cout << "The game is a draw." << endl;
+  }
+
+  cout << "Do you want to play again? (Y/N): ";
+  char answer;
+  cin >> answer;
+
+  if (answer == 'Y') {
+    main();
+  }
+
+  return 0;
 }
