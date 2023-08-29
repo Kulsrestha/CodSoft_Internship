@@ -1,0 +1,118 @@
+#include <iostream>
+#include <iomanip>
+#include <vector>
+#include <string>
+
+using namespace std;
+
+const int NUM_ROWS = 5;
+const int SEATS_PER_ROW = 10;
+const double TICKET_PRICE = 10.0;
+
+class Movie {
+public:
+    Movie(const string& title, int availableSeats) : title(title), availableSeats(availableSeats) {}
+
+    string title;
+    int availableSeats;
+};
+
+class Theater {
+public:
+    Theater() {
+        movies.push_back(Movie("Movie 1", NUM_ROWS * SEATS_PER_ROW));
+        movies.push_back(Movie("Movie 2", NUM_ROWS * SEATS_PER_ROW));
+    }
+
+    void showMovieList() {
+        cout << "Movie Listing:" << endl;
+        for (size_t i = 0; i < movies.size(); ++i) {
+            cout << i + 1 << ". " << movies[i].title << " (" << movies[i].availableSeats << " seats available)" << endl;
+        }
+    }
+
+    void bookTicket(int movieIndex) {
+        if (movieIndex >= 0 && movieIndex < movies.size()) {
+            Movie& selectedMovie = movies[movieIndex];
+            if (selectedMovie.availableSeats > 0) {
+                showSeatingPlan();
+                int row, seat;
+                cout << "Enter row and seat number (e.g., 1 3): ";
+                cin >> row >> seat;
+
+                if (isValidSeat(row, seat) && seatingPlan[row - 1][seat - 1] == 'X') {
+                    seatingPlan[row - 1][seat - 1] = 'O';
+                    selectedMovie.availableSeats--;
+                    cout << "Ticket booked successfully!" << endl;
+                } else {
+                    cout << "Invalid seat selection or seat already booked." << endl;
+                }
+            } else {
+                cout << "Sorry, the movie is fully booked." << endl;
+            }
+        } else {
+            cout << "Invalid movie selection." << endl;
+        }
+    }
+
+    void showSeatingPlan() {
+        cout << "Seating Plan:" << endl;
+        cout << "  ";
+        for (int seat = 1; seat <= SEATS_PER_ROW; ++seat) {
+            cout << setw(2) << seat;
+        }
+        cout << endl;
+
+        for (int row = 1; row <= NUM_ROWS; ++row) {
+            cout << setw(2) << row << " ";
+            for (int seat = 1; seat <= SEATS_PER_ROW; ++seat) {
+                cout << seatingPlan[row - 1][seat - 1] << "  ";
+            }
+            cout << endl;
+        }
+    }
+
+private:
+    vector<Movie> movies;
+    char seatingPlan[NUM_ROWS][SEATS_PER_ROW] = {0};
+
+    bool isValidSeat(int row, int seat) {
+        return row >= 1 && row <= NUM_ROWS && seat >= 1 && seat <= SEATS_PER_ROW;
+    }
+};
+
+int main() {
+    Theater theater;
+
+    while (true) {
+        cout << "\nOptions:" << endl;
+        cout << "1. Show Movie Listings" << endl;
+        cout << "2. Book Ticket" << endl;
+        cout << "3. Exit" << endl;
+
+        int choice;
+        cout << "Enter your choice: ";
+        cin >> choice;
+
+        switch (choice) {
+            case 1:
+                theater.showMovieList();
+                break;
+            case 2: {
+                int movieIndex;
+                cout << "Enter movie number: ";
+                cin >> movieIndex;
+                theater.bookTicket(movieIndex - 1);
+                break;
+            }
+            case 3:
+                cout << "Exiting..." << endl;
+                return 0;
+            default:
+                cout << "Invalid choice. Please choose again." << endl;
+                break;
+        }
+    }
+
+    return 0;
+}
